@@ -1,13 +1,14 @@
 // composables/useCryptoApi.ts
 import type { CryptoTicker, FormattedCryptoCard } from '~/types/crypto'
+import { SUPPORTED_ASSETS } from '~/types/crypto'
 import type { CandlestickData, Time } from 'lightweight-charts'
 
 export const useCryptoApi = () => {
-  const nameMap: Record<string, string> = {
-    BTCUSDT: 'Bitcoin',
-    ETHUSDT: 'Ethereum',
-    SOLUSDT: 'Solana'
-  }
+  // Creamos el mapa de nombres dinámicamente a partir de SUPPORTED_ASSETS
+  const nameMap = SUPPORTED_ASSETS.reduce<Record<string, string>>((acc, item) => {
+    acc[item.symbol] = item.name
+    return acc
+  }, {})
 
   const fetchTicker = async (symbol: string): Promise<FormattedCryptoCard | null> => {
     try {
@@ -30,18 +31,13 @@ export const useCryptoApi = () => {
     }
   }
 
-  // Nueva función para obtener el historial de Velas Japonesas
   const fetchKlines = async (symbol: string = 'BTCUSDT', interval: string = '1h', limit: number = 100): Promise<CandlestickData[]> => {
     try {
-      // El endpoint /klines devuelve una matriz de arrays
       const data = await $fetch<any[]>(
         `https://api.binance.com/api/v3/klines?symbol=${symbol}&interval=${interval}&limit=${limit}`
       )
 
-      // Mapeamos los datos de Binance al formato que requiere TradingView Lightweight Charts
       return data.map((item) => {
-        // Binance entrega el tiempo en milisegundos (Unix timestamp)
-        // TradingView prefiere el tiempo en segundos (milisegundos / 1000)
         const openTime = Math.floor(item[0] / 1000) as Time
 
         return {

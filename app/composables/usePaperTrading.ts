@@ -9,6 +9,13 @@ export interface TradePosition {
   timestamp: string
 }
 
+export interface TradeResult {
+  success: boolean
+  message: string
+}
+
+const normalizeSymbol = (symbol: string) => symbol.toUpperCase().replace(/USDT$/, '')
+
 export const usePaperTrading = () => {
   const INITIAL_BALANCE = 10000
   const usdtBalance = useState<number>('paper_usdt_balance', () => INITIAL_BALANCE)
@@ -21,12 +28,16 @@ export const usePaperTrading = () => {
 
   const tradeHistory = useState<TradePosition[]>('paper_history', () => [])
 
-  const buyAsset = (symbolName: string, currentPrice: number, usdtAmount: number) => {
-    if (usdtAmount <= 0) return { success: false, message: 'Ingresa un monto válido.' }
+  const buyAsset = (symbolName: string, currentPrice: number, usdtAmount: number): TradeResult => {
+    const cleanSymbol = normalizeSymbol(symbolName)
+
+    if (!cleanSymbol || !Number.isFinite(currentPrice) || currentPrice <= 0) {
+      return { success: false, message: 'El símbolo o precio no es válido.' }
+    }
+    if (!Number.isFinite(usdtAmount) || usdtAmount <= 0) return { success: false, message: 'Ingresa un monto válido.' }
     if (usdtAmount > usdtBalance.value) return { success: false, message: 'Saldo virtual USDT insuficiente.' }
 
     const assetQuantity = usdtAmount / currentPrice
-    const cleanSymbol = symbolName.replace('USDT', '')
 
     usdtBalance.value -= usdtAmount
     holdings.value[cleanSymbol] = (holdings.value[cleanSymbol] || 0) + assetQuantity
@@ -45,13 +56,18 @@ export const usePaperTrading = () => {
     return { success: true, message: `Compra ejecutada: ${assetQuantity.toFixed(4)} ${cleanSymbol}` }
   }
 
-  const sellAsset = (symbolName: string, currentPrice: number, percentage: number = 100) => {
-    const cleanSymbol = symbolName.replace('USDT', '')
+  const sellAsset = (symbolName: string, currentPrice: number, percentage: number = 100): TradeResult => {
+    const cleanSymbol = normalizeSymbol(symbolName)
     const currentHolding = holdings.value[cleanSymbol] || 0
 
+    if (!Number.isFinite(currentPrice) || currentPrice <= 0) {
+      return { success: false, message: 'El precio no es válido.' }
+    }
     if (currentHolding <= 0) return { success: false, message: `No tienes ${cleanSymbol} disponible para vender.` }
 
-    const quantityToSell = currentHolding * (percentage / 100)
+    const salePercentage = Math.min(Math.max(percentage, 0), 100)
+    const quantityToSell = currentHolding * (salePercentage / 100)
+    if (quantityToSell <= 0) return { success: false, message: 'El porcentaje de venta no es válido.' }
     const usdtEarned = quantityToSell * currentPrice
 
     holdings.value[cleanSymbol] -= quantityToSell

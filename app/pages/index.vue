@@ -1,18 +1,19 @@
 <!-- pages/index.vue -->
 <script setup lang="ts">
 import type { FormattedCryptoCard } from '~/types/crypto'
+import { SUPPORTED_ASSETS } from '~/types/crypto'
 import type { CandlestickData } from 'lightweight-charts'
 
 const { fetchTicker, fetchKlines } = useCryptoApi()
 
-const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT']
+// Cargamos todas las monedas configuradas en SUPPORTED_ASSETS
+const symbols = SUPPORTED_ASSETS.map(a => a.symbol)
 const assets = ref<FormattedCryptoCard[]>([])
 const chartData = ref<CandlestickData[]>([])
 
 const isLoadingAssets = ref(true)
 const isLoadingChart = ref(true)
 
-// Control de selección
 const selectedSymbol = ref('BTCUSDT')
 const selectedInterval = ref('1h')
 
@@ -23,7 +24,6 @@ const loadMarketData = async () => {
   isLoadingAssets.value = false
 }
 
-// Carga las velas japonesas según la moneda e intervalo
 const loadChartData = async (symbol: string = selectedSymbol.value, interval: string = selectedInterval.value) => {
   isLoadingChart.value = true
   selectedSymbol.value = symbol
@@ -55,26 +55,26 @@ onUnmounted(() => {
     <div class="flex items-center justify-between">
       <div>
         <h2 class="text-lg font-bold text-white">Mercado Principal</h2>
-        <p class="text-xs text-slate-400">Precios actualizados directamente desde Binance Spot</p>
+        <p class="text-xs text-slate-400">Precios en tiempo real de los 6 activos monitoreados</p>
       </div>
 
       <button 
         @click="loadMarketData"
-        class="bg-dark-surface hover:bg-dark-border text-slate-300 text-xs px-3 py-2 rounded-lg border border-dark-border flex items-center gap-2 transition-all"
+        class="bg-dark-surface hover:bg-dark-border text-slate-300 text-xs px-3 py-2 rounded-lg border border-dark-border flex items-center gap-2 transition-all cursor-pointer"
       >
         <span>🔄</span>
         <span>Refrescar</span>
       </button>
     </div>
 
-    <!-- Grid de Tarjetas (Haz clic en cualquiera para actualizar el gráfico) -->
-    <div v-if="!isLoadingAssets" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <!-- Grid de Tarjetas (6 Monedas) -->
+    <div v-if="!isLoadingAssets" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
       <div 
         v-for="asset in assets" 
         :key="asset.symbol"
         @click="handleSelectAsset(asset.symbol)"
         :class="[
-          selectedSymbol.startsWith(asset.symbol) ? 'ring-2 ring-brand-primary' : '',
+          selectedSymbol.startsWith(asset.symbol) ? 'ring-2 ring-indigo-500 scale-[1.02]' : 'hover:border-slate-600',
           'cursor-pointer transition-all rounded-xl'
         ]"
       >
@@ -82,14 +82,14 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <div v-else class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <div v-for="i in 3" :key="i" class="h-32 bg-dark-surface/50 border border-dark-border rounded-xl animate-pulse"></div>
+    <!-- Skeleton Loading -->
+    <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+      <div v-for="i in 6" :key="i" class="h-28 bg-dark-surface/50 border border-dark-border rounded-xl animate-pulse"></div>
     </div>
 
-    <!-- Sección del Gráfico Interactivo e Indicadores -->
+    <!-- Gráficos -->
     <div class="pt-2 space-y-4">
       <ClientOnly>
-        <!-- Gráfico de Velas Japonesas + SMA 20 -->
         <CandlestickChart 
           :data="chartData" 
           :activeSymbol="selectedSymbol"
@@ -97,7 +97,6 @@ onUnmounted(() => {
           @changeInterval="(tf) => loadChartData(selectedSymbol, tf)"
         />
 
-        <!-- Sub-Gráfico del Oscilador RSI (14) -->
         <RsiChart :data="chartData" />
         
         <template #fallback>

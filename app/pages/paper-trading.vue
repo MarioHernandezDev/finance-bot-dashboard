@@ -1,11 +1,13 @@
 <!-- pages/paper-trading.vue -->
 <script setup lang="ts">
 import type { FormattedCryptoCard } from '~/types/crypto'
+import { SUPPORTED_ASSETS } from '~/types/crypto'
 
 const { fetchTicker } = useCryptoApi()
 const { tradeHistory } = usePaperTrading()
 
-const symbols = ['BTCUSDT', 'ETHUSDT', 'SOLUSDT']
+// Carga las 6 monedas dinámicamente desde SUPPORTED_ASSETS
+const symbols = SUPPORTED_ASSETS.map(a => a.symbol)
 const assets = ref<FormattedCryptoCard[]>([])
 const selectedSymbol = ref('BTCUSDT')
 
@@ -53,15 +55,17 @@ onUnmounted(() => {
     <!-- KPIs del Portafolio (PnL y Balance) -->
     <PortfolioStats :prices="pricesMap" />
 
-    <!-- Selector de Cripto -->
-    <div class="flex items-center gap-3">
+    <!-- Selector de Cripto (Todas las monedas) -->
+    <div class="flex items-center gap-2 overflow-x-auto pb-1">
       <button
         v-for="symbol in symbols"
         :key="symbol"
         @click="selectedSymbol = symbol"
         :class="[
-          selectedSymbol === symbol ? 'bg-brand-primary text-white font-bold' : 'bg-dark-surface text-slate-400 hover:text-white',
-          'px-4 py-2 rounded-lg border border-dark-border text-xs font-mono transition-all'
+          selectedSymbol === symbol 
+            ? 'bg-indigo-600 text-white font-bold border-indigo-500 shadow-md shadow-indigo-950/50' 
+            : 'bg-dark-surface text-slate-400 hover:text-white border-dark-border',
+          'px-3.5 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer whitespace-nowrap'
         ]"
       >
         {{ symbol.replace('USDT', '') }}/USDT
@@ -75,9 +79,7 @@ onUnmounted(() => {
         :currentPrice="currentSelectedAssetPrice"
       />
 
-      <BotControlPanel 
-        :symbol="selectedSymbol"
-      />
+      <BotControlPanel />
     </div>
 
     <!-- Historial de Transacciones -->

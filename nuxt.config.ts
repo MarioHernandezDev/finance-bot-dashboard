@@ -3,5 +3,8 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss'],
-  css: ['~/assets/css/main.css']
+  css: ['~/assets/css/main.css'],
+  runtimeConfig: {
+    systemPassword: process.env.SYSTEM_PASSWORD || '4B73l1t0b1c01n_'
+  }
 })
