@@ -2,7 +2,7 @@ import { SUPPORTED_ASSETS, type RiskLevel } from '~/types/crypto'
 import { appendBotLog, getBotSettings } from './bot-state'
 import { buyAsset, getPaperTradingState, sellAsset } from './paper-trading'
 
-const BINANCE_KLINES_URL = 'https://data-api.binance.vision/api/v3/klines'
+const BINANCE_KLINES_URL = 'https://api3.binance.com/api/v3/klines'
 const BETWEEN_ASSETS_DELAY_MS = 300
 
 export class BinanceRateLimitError extends Error {
