@@ -46,26 +46,33 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div>
-      <h2 class="text-lg font-bold text-white">Consola de Paper Trading</h2>
-      <p class="text-xs text-slate-400">Simula operaciones de compra y venta en tiempo real sin riesgo financiero</p>
+  <div class="max-w-[1600px] mx-auto space-y-5 sm:space-y-6">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span class="text-[10px] text-emerald-400 font-mono uppercase tracking-[0.2em]">Paper environment / online</span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-white">Consola de Paper Trading</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mt-1">Simulación de operaciones en tiempo real sin riesgo financiero</p>
+      </div>
+      <span class="self-start sm:self-auto text-[10px] font-mono text-slate-500 border border-slate-800 bg-slate-900/60 rounded-lg px-2.5 py-1.5">MARKET DATA / 10 SEC</span>
     </div>
 
     <!-- KPIs del Portafolio (PnL y Balance) -->
     <PortfolioStats :prices="pricesMap" />
 
     <!-- Selector de Cripto (Todas las monedas) -->
-    <div class="flex items-center gap-2 overflow-x-auto pb-1">
+    <div class="flex items-center gap-2 overflow-x-auto pb-2 -mx-1 px-1 snap-x">
       <button
         v-for="symbol in symbols"
         :key="symbol"
         @click="selectedSymbol = symbol"
         :class="[
           selectedSymbol === symbol 
-            ? 'bg-indigo-600 text-white font-bold border-indigo-500 shadow-md shadow-indigo-950/50' 
-            : 'bg-dark-surface text-slate-400 hover:text-white border-dark-border',
-          'px-3.5 py-2 rounded-xl border text-xs font-mono transition-all cursor-pointer whitespace-nowrap'
+            ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md shadow-emerald-950/30'
+            : 'bg-slate-900/80 text-slate-400 hover:text-white border-slate-800',
+          'px-3.5 py-2.5 rounded-xl border text-xs font-mono transition-all active:scale-[0.98] cursor-pointer whitespace-nowrap snap-start'
         ]"
       >
         {{ symbol.replace('USDT', '') }}/USDT
@@ -73,7 +80,7 @@ onUnmounted(() => {
     </div>
 
     <!-- Grid: Operativa Manual + Bot Algorítmico -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-6">
       <TradePanel 
         :symbol="selectedSymbol"
         :currentPrice="currentSelectedAssetPrice"
@@ -83,14 +90,17 @@ onUnmounted(() => {
     </div>
 
     <!-- Historial de Transacciones -->
-    <div class="bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-3">
-      <h3 class="text-sm font-bold text-white flex items-center gap-2">
-        <span>📋</span> Historial de Transacciones
-      </h3>
+    <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl p-4 sm:p-5 shadow-xl shadow-black/10 space-y-3">
+      <div class="flex items-center justify-between gap-3">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span class="text-emerald-400">▦</span> Historial de Transacciones
+        </h3>
+        <span class="text-[10px] text-slate-500 font-mono uppercase">Execution ledger</span>
+      </div>
 
       <div v-if="tradeHistory.length > 0" class="overflow-x-auto">
-        <table class="w-full text-left text-xs font-mono">
-          <thead class="text-slate-500 border-b border-dark-border uppercase text-[10px]">
+        <table class="w-full min-w-[620px] text-left text-xs font-mono">
+          <thead class="text-slate-500 border-b border-slate-800 uppercase text-[10px]">
             <tr>
               <th class="pb-2">Hora</th>
               <th class="pb-2">Tipo</th>
@@ -101,17 +111,17 @@ onUnmounted(() => {
             </tr>
           </thead>
           <tbody class="divide-y divide-dark-border/50 text-slate-300">
-            <tr v-for="trade in tradeHistory" :key="trade.id" class="hover:bg-dark-bg/50">
-              <td class="py-2.5 text-slate-500">{{ trade.timestamp }}</td>
+            <tr v-for="trade in tradeHistory" :key="trade.id" class="hover:bg-slate-800/40">
+              <td class="py-3 text-slate-500">{{ trade.timestamp }}</td>
               <td class="py-2.5">
                 <span :class="trade.type === 'BUY' ? 'text-emerald-400 bg-emerald-500/10' : 'text-red-400 bg-red-500/10'" class="px-1.5 py-0.5 rounded font-bold">
                   {{ trade.type }}
                 </span>
               </td>
-              <td class="py-2.5 font-bold text-white">{{ trade.symbol }}</td>
-              <td class="py-2.5">{{ formatCurrency(trade.price) }}</td>
-              <td class="py-2.5">{{ trade.amount.toFixed(4) }}</td>
-              <td class="py-2.5 text-right font-bold text-white">{{ formatCurrency(trade.total) }}</td>
+              <td class="py-3 font-bold text-white">{{ trade.symbol }}</td>
+              <td class="py-3">{{ formatCurrency(trade.price) }}</td>
+              <td class="py-3">{{ trade.amount.toFixed(4) }}</td>
+              <td class="py-3 text-right font-bold text-white">{{ formatCurrency(trade.total) }}</td>
             </tr>
           </tbody>
         </table>
