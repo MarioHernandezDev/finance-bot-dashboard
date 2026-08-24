@@ -1,5 +1,14 @@
 # Nuxt Minimal Starter
 
+## Arquitectura del bot
+
+- `server/plugins/bot-engine.ts` mantiene el ciclo del bot en procesos Node persistentes y escanea los seis símbolos cada 10 segundos.
+- `server/api/bot/state.ts` permite leer logs/configuración y cambiar activación, umbrales RSI y asignación de riesgo.
+- `server/utils/paper-trading.ts` centraliza saldo, holdings e historial. Nitro los guarda mediante `unstorage` en `server/data` durante desarrollo.
+- `server/api/cron/scan.ts` ejecuta un escaneo único para plataformas serverless. `vercel.json` lo programa cada minuto.
+
+En Render o Node debe ejecutarse el servidor Nitro como proceso persistente. En Vercel, el almacenamiento local no es durable entre instancias: para conservar cartera entre despliegues hay que sustituir el driver `fs` de `bot-state` por una base de datos o KV administrado.
+
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
 ## Setup

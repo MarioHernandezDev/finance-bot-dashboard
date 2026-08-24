@@ -18,13 +18,13 @@ const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
 }
 
-const handleBuy = () => {
-  const result = buyAsset(props.symbol, props.currentPrice, tradeAmount.value)
+const handleBuy = async () => {
+  const result = await buyAsset(props.symbol, props.currentPrice, tradeAmount.value)
   showMessage(result.message, !result.success)
 }
 
-const handleSell = () => {
-  const result = sellAsset(props.symbol, props.currentPrice, 100)
+const handleSell = async () => {
+  const result = await sellAsset(props.symbol, props.currentPrice, 100)
   showMessage(result.message, !result.success)
 }
 

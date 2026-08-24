@@ -6,5 +6,13 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css'],
   runtimeConfig: {
     systemPassword: process.env.SYSTEM_PASSWORD || '4B73l1t0b1c01n_'
+  },
+  nitro: {
+    storage: {
+      'bot-state': {
+        driver: 'fs',
+        base: './server/data'
+      }
+    }
   }
 })

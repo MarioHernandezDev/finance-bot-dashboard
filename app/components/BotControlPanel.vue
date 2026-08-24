@@ -1,6 +1,6 @@
 <!-- components/BotControlPanel.vue -->
 <script setup lang="ts">
-import { SUPPORTED_ASSETS, type RiskLevel } from '~/types/crypto'
+import type { RiskLevel } from '~/types/crypto'
 
 const { 
   isBotActive, 
@@ -8,52 +8,8 @@ const {
   buyRsiThreshold, 
   sellRsiThreshold, 
   riskAllocation, 
-  toggleBot, 
-  evaluateMarket 
+  toggleBot
 } = useTradingBot()
-
-const SCAN_INTERVAL_MS = 10000
-let timeoutId: ReturnType<typeof setTimeout> | undefined
-let isScanning = false
-
-const scanAllMarkets = async () => {
-  if (isScanning) return
-  isScanning = true
-  try {
-    for (const asset of SUPPORTED_ASSETS) {
-      await evaluateMarket(asset.symbol)
-    }
-  } finally {
-    isScanning = false
-    if (isBotActive.value) scheduleNextScan()
-  }
-}
-
-const clearScanTimeout = () => {
-  if (timeoutId !== undefined) {
-    clearTimeout(timeoutId)
-    timeoutId = undefined
-  }
-}
-
-const scheduleNextScan = () => {
-  clearScanTimeout()
-  if (!isBotActive.value) return
-  timeoutId = setTimeout(() => {
-    timeoutId = undefined
-    void scanAllMarkets()
-  }, SCAN_INTERVAL_MS)
-}
-
-watch(isBotActive, (active) => {
-  clearScanTimeout()
-  if (active) void scanAllMarkets()
-})
-
-onUnmounted(() => {
-  clearScanTimeout()
-  isBotActive.value = false
-})
 
 const getRiskBadgeClass = (risk: RiskLevel) => {
   switch (risk) {
