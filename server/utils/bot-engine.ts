@@ -1,9 +1,13 @@
 import { SUPPORTED_ASSETS, type RiskLevel } from '~/types/crypto'
 import { appendBotLog, getBotSettings } from './bot-state'
 import { buyAsset, getPaperTradingState, sellAsset } from './paper-trading'
+import { sendTelegramAlert } from './telegram'
 
 const BINANCE_KLINES_URL = 'https://api3.binance.com/api/v3/klines'
 const BETWEEN_ASSETS_DELAY_MS = 300
+const ALERT_COOLDOWN_MS = 15 * 60 * 1000
+const ALERT_SYMBOLS = new Set(['SOLUSDT', 'LINKUSDT', 'FETUSDT', 'PEPEUSDT'])
+const lastAlertAt = new Map<string, number>()
 
 export class BinanceRateLimitError extends Error {
   constructor(status: number) {
@@ -19,6 +23,39 @@ const getHttpStatus = (error: unknown) => {
     : undefined
   const status = 'status' in error ? error.status : responseStatus
   return typeof status === 'number' ? status : undefined
+}
+
+const sendExtremeMarketAlert = async (symbol: string, rsi: number, latestPrice: number, drop15m: number) => {
+  const isOversold = ALERT_SYMBOLS.has(symbol) && rsi <= 25
+  const isRapidDrop = drop15m <= -5
+  if (!isOversold && !isRapidDrop) return
+
+  const alertKey = `${symbol}:${isOversold ? 'rsi' : ''}:${isRapidDrop ? 'drop' : ''}`
+  const now = Date.now()
+  if (now - (lastAlertAt.get(alertKey) || 0) < ALERT_COOLDOWN_MS) return
+
+  const asset = SUPPORTED_ASSETS.find(item => item.symbol === symbol)
+  const risk = asset?.risk === 'HIGH' ? 'Alto' : 'Medio'
+  const suggestion = isOversold
+    ? 'Posible compra en suelo por sobreventa extrema'
+    : 'Posible toma de beneficios o revisión del riesgo'
+  const reasons = [
+    isOversold ? `RSI ${rsi.toFixed(1)}` : '',
+    isRapidDrop ? `caída ${drop15m.toFixed(2)}% en 15 minutos` : ''
+  ].filter(Boolean).join(' | ')
+  const message = [
+    '🚨 *ALERTA DE OPORTUNIDAD/RIESGO*',
+    `*Moneda:* ${symbol.replace(/USDT$/, '')}`,
+    `*RSI actual:* ${rsi.toFixed(1)} | *Precio:* $${latestPrice}`,
+    `*Nivel de Riesgo:* ${risk}`,
+    `*Sugerencia de acción manual:* ${suggestion}`,
+    `*Señal detectada:* ${reasons}`,
+    '*Advertencia:* Esta es una alerta de volatilidad. Realiza tu propio análisis antes de ejecutar la orden manual.'
+  ].join('\n')
+
+  lastAlertAt.set(alertKey, now)
+  await sendTelegramAlert(message)
+  await appendBotLog(`📨 Alerta de Telegram enviada para ${symbol.replace(/USDT$/, '')}: ${reasons}`)
 }
 
 export const evaluateMarket = async (symbol: string) => {
@@ -49,12 +86,15 @@ export const evaluateMarket = async (symbol: string) => {
     const avgLoss = losses.length ? losses.reduce((a, b) => a + b, 0) / 14 : 1
     const rs = avgGain / (avgLoss === 0 ? 0.001 : avgLoss)
     const rsi = 100 - (100 / (1 + rs))
+    const price15MinutesAgo = closePrices.at(-16)
+    const drop15m = price15MinutesAgo ? ((latestPrice - price15MinutesAgo) / price15MinutesAgo) * 100 : 0
 
     const settings = await getBotSettings()
     const paperTrading = await getPaperTradingState()
     const assetName = symbol.replace(/USDT$/, '')
     const currentHolding = paperTrading.holdings[assetName] || 0
     await appendBotLog(`🔍 ${assetName}: RSI ${rsi.toFixed(1)} | $${latestPrice} | SMA20 $${sma20.toFixed(2)}`)
+    await sendExtremeMarketAlert(symbol, rsi, latestPrice, drop15m)
 
     if (rsi <= settings.buyRsiThreshold && latestPrice > sma20 && currentHolding <= 0) {
       const assetInfo = SUPPORTED_ASSETS.find(asset => asset.symbol === symbol)
