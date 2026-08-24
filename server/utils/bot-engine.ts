@@ -3,6 +3,23 @@ import { appendBotLog, getBotSettings } from './bot-state'
 import { buyAsset, getPaperTradingState, sellAsset } from './paper-trading'
 
 const BINANCE_KLINES_URL = 'https://data-api.binance.vision/api/v3/klines'
+const BETWEEN_ASSETS_DELAY_MS = 300
+
+export class BinanceRateLimitError extends Error {
+  constructor(status: number) {
+    super(`Binance rate limit: HTTP ${status}`)
+    this.name = 'BinanceRateLimitError'
+  }
+}
+
+const getHttpStatus = (error: unknown) => {
+  if (!error || typeof error !== 'object') return undefined
+  const responseStatus = 'response' in error && error.response && typeof error.response === 'object' && 'status' in error.response
+    ? error.response.status
+    : undefined
+  const status = 'status' in error ? error.status : responseStatus
+  return typeof status === 'number' ? status : undefined
+}
 
 export const evaluateMarket = async (symbol: string) => {
   try {
@@ -54,11 +71,19 @@ export const evaluateMarket = async (symbol: string) => {
       await appendBotLog(`${result.success ? '✅' : '❌'} ${result.message}`)
     }
   } catch (error: unknown) {
+    const status = getHttpStatus(error)
+    if (status === 429 || status === 418) {
+      await appendBotLog(`⚠️ Binance respondió HTTP ${status} (rate limit). El bot esperará 60 segundos antes del siguiente ciclo.`)
+      throw new BinanceRateLimitError(status)
+    }
     const message = error instanceof Error ? error.message : 'Error de red'
     await appendBotLog(`❌ Error en ${symbol}: ${message}`)
   }
 }
 
 export const scanAllMarkets = async () => {
-  for (const asset of SUPPORTED_ASSETS) await evaluateMarket(asset.symbol)
+  for (const [index, asset] of SUPPORTED_ASSETS.entries()) {
+    if (index > 0) await new Promise(resolve => setTimeout(resolve, BETWEEN_ASSETS_DELAY_MS))
+    await evaluateMarket(asset.symbol)
+  }
 }
