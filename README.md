@@ -4,10 +4,22 @@
 
 - `server/plugins/bot-engine.ts` mantiene el ciclo del bot en procesos Node persistentes y escanea los seis símbolos cada 10 segundos.
 - `server/api/bot/state.ts` permite leer logs/configuración y cambiar activación, umbrales RSI y asignación de riesgo.
-- `server/utils/paper-trading.ts` centraliza saldo, holdings e historial. Nitro los guarda mediante `unstorage` en `server/data` durante desarrollo.
+- `server/utils/paper-trading.ts` centraliza saldo, holdings e historial y los persiste en Supabase.
 - `server/api/cron/scan.ts` ejecuta un escaneo único para plataformas serverless. `vercel.json` lo programa cada minuto.
 
-En Render o Node debe ejecutarse el servidor Nitro como proceso persistente. En Vercel, el almacenamiento local no es durable entre instancias: para conservar cartera entre despliegues hay que sustituir el driver `fs` de `bot-state` por una base de datos o KV administrado.
+Ejecuta [schema.sql](schema.sql) en el SQL Editor de Supabase antes de iniciar el bot. La fila `bot_state` es singleton y `bot_logs` conserva los escaneos y errores aunque Render se reinicie.
+
+## Variables de entorno
+
+Configura estas variables en Render o en `.env` local:
+
+```bash
+SUPABASE_URL=https://cuevtgcoggtwwgczofen.supabase.co
+SUPABASE_KEY=tu_clave_publishable_de_Supabase
+SYSTEM_PASSWORD=tu_password
+```
+
+`SUPABASE_URL` y `SUPABASE_KEY` tienen valores de desarrollo integrados como fallback, pero se recomienda configurarlos explícitamente en producción.
 
 ## Alertas de Telegram
 

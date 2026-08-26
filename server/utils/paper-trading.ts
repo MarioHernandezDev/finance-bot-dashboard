@@ -19,6 +19,8 @@ export interface TradeResult {
   message: string
 }
 
+import { BOT_STATE_ID, supabase } from './supabase'
+
 const INITIAL_BALANCE = 10000
 
 const defaultState = (): PaperTradingState => ({
@@ -38,29 +40,33 @@ const normalizePaperTradingState = (stored: Partial<PaperTradingState> | null | 
 }
 
 export const getPaperTradingState = async () => {
-  const storage = useStorage('bot-state')
-  let state: PaperTradingState | null = null
-  try {
-    const stored = await storage.getItem<PaperTradingState | string>('paper-trading')
-    if (typeof stored === 'string') {
-      try {
-        state = JSON.parse(stored) as PaperTradingState
-      } catch {
-        await storage.removeItem('paper-trading')
-      }
-    } else state = stored
-  } catch {
-    await storage.removeItem('paper-trading')
-  }
+  const { data, error } = await supabase
+    .from('bot_state')
+    .select('usdt_balance, holdings, trade_history')
+    .eq('id', BOT_STATE_ID)
+    .maybeSingle()
+  if (error) throw new Error(`No se pudo leer la cartera: ${error.message}`)
+
+  const state = data ? {
+    usdtBalance: Number(data.usdt_balance),
+    holdings: data.holdings as Record<string, number>,
+    tradeHistory: data.trade_history as TradePosition[]
+  } : null
   const normalizedState = normalizePaperTradingState(state)
   if (JSON.stringify(state) !== JSON.stringify(normalizedState)) {
-    await storage.setItem('paper-trading', normalizedState)
+    await savePaperTradingState(normalizedState)
   }
   return normalizedState
 }
 
 export const savePaperTradingState = async (state: PaperTradingState) => {
-  await useStorage('bot-state').setItem('paper-trading', state)
+  const { error } = await supabase.from('bot_state').upsert({
+    id: BOT_STATE_ID,
+    usdt_balance: state.usdtBalance,
+    holdings: state.holdings,
+    trade_history: state.tradeHistory
+  })
+  if (error) throw new Error(`No se pudo guardar la cartera: ${error.message}`)
 }
 
 const normalizeSymbol = (symbol: string) => symbol.toUpperCase().replace(/USDT$/, '')

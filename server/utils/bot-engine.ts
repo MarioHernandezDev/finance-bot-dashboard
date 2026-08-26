@@ -1,5 +1,5 @@
 import { SUPPORTED_ASSETS, type RiskLevel } from '~/types/crypto'
-import { appendBotLog, getBotSettings } from './bot-state'
+import { appendBotLog, getBotSettings, updateLastScanTimestamp } from './bot-state'
 import { buyAsset, getPaperTradingState, sellAsset } from './paper-trading'
 import { sendTelegramAlert } from './telegram'
 
@@ -55,7 +55,7 @@ const sendExtremeMarketAlert = async (symbol: string, rsi: number, latestPrice: 
 
   lastAlertAt.set(alertKey, now)
   await sendTelegramAlert(message)
-  await appendBotLog(`📨 Alerta de Telegram enviada para ${symbol.replace(/USDT$/, '')}: ${reasons}`)
+  await appendBotLog(`📨 Alerta de Telegram enviada para ${symbol.replace(/USDT$/, '')}: ${reasons}`, symbol)
 }
 
 export const evaluateMarket = async (symbol: string) => {
@@ -93,7 +93,7 @@ export const evaluateMarket = async (symbol: string) => {
     const paperTrading = await getPaperTradingState()
     const assetName = symbol.replace(/USDT$/, '')
     const currentHolding = paperTrading.holdings[assetName] || 0
-    await appendBotLog(`🔍 ${assetName}: RSI ${rsi.toFixed(1)} | $${latestPrice} | SMA20 $${sma20.toFixed(2)}`)
+    await appendBotLog(`🔍 ${assetName}: RSI ${rsi.toFixed(1)} | $${latestPrice} | SMA20 $${sma20.toFixed(2)}`, symbol)
     await sendExtremeMarketAlert(symbol, rsi, latestPrice, drop15m)
 
     if (rsi <= settings.buyRsiThreshold && latestPrice > sma20 && currentHolding <= 0) {
@@ -101,23 +101,23 @@ export const evaluateMarket = async (symbol: string) => {
       const risk: RiskLevel = assetInfo?.risk || 'MEDIUM'
       const amountUSDT = paperTrading.usdtBalance * ((settings.riskAllocation[risk] || 0) / 100)
       if (amountUSDT >= 1) {
-        await appendBotLog(`⚡ Ejecutando COMPRA ${assetName} por $${amountUSDT.toFixed(2)}...`)
+        await appendBotLog(`⚡ Ejecutando COMPRA ${assetName} por $${amountUSDT.toFixed(2)}...`, symbol)
         const result = await buyAsset(symbol, latestPrice, amountUSDT)
-        await appendBotLog(`${result.success ? '✅' : '❌'} ${result.message}`)
-      } else await appendBotLog(`⚠️ Saldo insuficiente para comprar ${assetName}.`)
+        await appendBotLog(`${result.success ? '✅' : '❌'} ${result.message}`, symbol)
+      } else await appendBotLog(`⚠️ Saldo insuficiente para comprar ${assetName}.`, symbol)
     } else if (rsi >= settings.sellRsiThreshold && currentHolding > 0) {
-      await appendBotLog(`⚡ Ejecutando VENTA ${assetName}...`)
+      await appendBotLog(`⚡ Ejecutando VENTA ${assetName}...`, symbol)
       const result = await sellAsset(symbol, latestPrice)
-      await appendBotLog(`${result.success ? '✅' : '❌'} ${result.message}`)
+      await appendBotLog(`${result.success ? '✅' : '❌'} ${result.message}`, symbol)
     }
   } catch (error: unknown) {
     const status = getHttpStatus(error)
     if (status === 429 || status === 418) {
-      await appendBotLog(`⚠️ Binance respondió HTTP ${status} (rate limit). El bot esperará 60 segundos antes del siguiente ciclo.`)
+      await appendBotLog(`⚠️ Binance respondió HTTP ${status} (rate limit). El bot esperará 60 segundos antes del siguiente ciclo.`, symbol)
       throw new BinanceRateLimitError(status)
     }
     const message = error instanceof Error ? error.message : 'Error de red'
-    await appendBotLog(`❌ Error en ${symbol}: ${message}`)
+    await appendBotLog(`❌ Error en ${symbol}: ${message}`, symbol)
   }
 }
 
@@ -126,4 +126,5 @@ export const scanAllMarkets = async () => {
     if (index > 0) await new Promise(resolve => setTimeout(resolve, BETWEEN_ASSETS_DELAY_MS))
     await evaluateMarket(asset.symbol)
   }
+  await updateLastScanTimestamp()
 }
