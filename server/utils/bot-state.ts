@@ -18,6 +18,12 @@ const defaultSettings = (): BotSettings => ({
   logs: []
 })
 
+const defaultPaperTradingState = (): PaperTradingState => ({
+  usdtBalance: 10000,
+  holdings: {},
+  tradeHistory: []
+})
+
 const normalizeSettings = (stored: Partial<BotSettings> | null | undefined): BotSettings => {
   const defaults = defaultSettings()
   return {
@@ -29,35 +35,45 @@ const normalizeSettings = (stored: Partial<BotSettings> | null | undefined): Bot
 }
 
 export const getBotSettings = async () => {
-  const { data, error } = await supabase
-    .from('bot_state')
-    .select('settings')
-    .eq('id', BOT_STATE_ID)
-    .maybeSingle()
-  if (error) throw new Error(`No se pudo leer el estado del bot: ${error.message}`)
+  try {
+    const { data, error } = await supabase
+      .from('bot_state')
+      .select('settings')
+      .eq('id', BOT_STATE_ID)
+      .maybeSingle()
+    if (error) throw error
 
-  const settings = data?.settings as Partial<BotSettings> | null | undefined
-  const normalizedSettings = normalizeSettings(settings)
-  if (JSON.stringify(settings || {}) !== JSON.stringify(normalizedSettings)) {
-    const { error: saveError } = await supabase.from('bot_state').upsert({
-      id: BOT_STATE_ID,
-      is_active: normalizedSettings.isActive,
-      settings: normalizedSettings
-    })
-    if (saveError) throw new Error(`No se pudo inicializar la configuración: ${saveError.message}`)
+    const normalizedSettings = normalizeSettings(data?.settings as Partial<BotSettings> | null | undefined)
+    if (!data || JSON.stringify(data.settings || {}) !== JSON.stringify(normalizedSettings)) {
+      await ensureBotState(normalizedSettings)
+    }
+    return normalizedSettings
+  } catch {
+    return defaultSettings()
   }
-  return normalizedSettings
 }
 
-export const updateBotSettings = async (changes: Partial<BotSettings>) => {
-  const settings = normalizeSettings({ ...(await getBotSettings()), ...changes })
+const ensureBotState = async (settings = defaultSettings()) => {
   const { error } = await supabase.from('bot_state').upsert({
     id: BOT_STATE_ID,
     is_active: settings.isActive,
+    usdt_balance: 10000,
+    holdings: {},
+    trade_history: [],
     settings
   })
-  if (error) throw new Error(`No se pudo guardar la configuración: ${error.message}`)
+  if (error) throw error
   return settings
+}
+
+export const updateBotSettings = async (changes: Partial<BotSettings>) => {
+  try {
+    const settings = normalizeSettings({ ...(await getBotSettings()), ...changes })
+    await ensureBotState(settings)
+    return settings
+  } catch {
+    return normalizeSettings(changes)
+  }
 }
 
 export const appendBotLog = async (message: string, symbol?: string) => {
@@ -67,33 +83,48 @@ export const appendBotLog = async (message: string, symbol?: string) => {
 }
 
 export const updateLastScanTimestamp = async () => {
-  const { error } = await supabase.from('bot_state').upsert({
-    id: BOT_STATE_ID,
-    last_scan_timestamp: new Date().toISOString()
-  })
-  if (error) throw new Error(`No se pudo guardar la fecha del escaneo: ${error.message}`)
+  try {
+    const { error } = await supabase.from('bot_state').upsert({
+      id: BOT_STATE_ID,
+      last_scan_timestamp: new Date().toISOString()
+    })
+    if (error) throw error
+  } catch {
+  }
 }
 
 export const getBotState = async () => {
-  const [{ data, error }, settings, paperTrading] = await Promise.all([
-    supabase.from('bot_state').select('last_scan_timestamp').eq('id', BOT_STATE_ID).maybeSingle(),
-    getBotSettings(),
-    getPaperTradingState()
-  ])
-  if (error) throw new Error(`No se pudo leer la fecha del escaneo: ${error.message}`)
+  const fallbackState = {
+    ...defaultSettings(),
+    lastScanTimestamp: null,
+    paperTrading: defaultPaperTradingState()
+  }
+  try {
+    const [{ data }, settings, paperTrading] = await Promise.all([
+      supabase.from('bot_state').select('last_scan_timestamp').eq('id', BOT_STATE_ID).maybeSingle(),
+      getBotSettings(),
+      getPaperTradingState().catch(() => defaultPaperTradingState())
+    ])
+    if (!data) await ensureBotState(settings)
 
-  const { data: logRows, error: logError } = await supabase
-    .from('bot_logs')
-    .select('timestamp, message')
-    .order('timestamp', { ascending: false })
-    .limit(200)
-  if (logError) throw new Error(`No se pudieron leer los logs: ${logError.message}`)
-
-  return {
-    ...settings,
-    logs: (logRows || []).map(log => `[${new Date(log.timestamp).toLocaleTimeString()}] ${log.message}`),
-    lastScanTimestamp: data?.last_scan_timestamp || null,
-    paperTrading
+    let logs: string[] = []
+    try {
+      const { data: logRows } = await supabase
+        .from('bot_logs')
+        .select('timestamp, message')
+        .order('timestamp', { ascending: false })
+        .limit(200)
+      logs = (logRows || []).map(log => `[${new Date(log.timestamp).toLocaleTimeString()}] ${log.message}`)
+    } catch {
+      logs = []
+    }
+    return { ...settings, logs, lastScanTimestamp: data?.last_scan_timestamp || null, paperTrading }
+  } catch {
+    try {
+      await ensureBotState()
+    } catch {
+    }
+    return fallbackState
   }
 }
 
