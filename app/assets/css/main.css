@@ -1,8 +1,15 @@
 /* assets/css/main.css */
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 body {
-  @apply bg-dark-bg text-slate-200 antialiased font-sans;
+  @apply bg-slate-50 text-slate-800 antialiased;
+  font-family: 'Plus Jakarta Sans', sans-serif;
 }
+
+button, input { font-family: inherit; }
+
+.font-mono { font-family: 'DM Mono', monospace; }
