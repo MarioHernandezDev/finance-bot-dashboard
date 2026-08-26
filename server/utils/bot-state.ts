@@ -69,7 +69,14 @@ const ensureBotState = async (settings = defaultSettings()) => {
 export const updateBotSettings = async (changes: Partial<BotSettings>) => {
   try {
     const settings = normalizeSettings({ ...(await getBotSettings()), ...changes })
-    await ensureBotState(settings)
+    const { error } = await supabase
+      .from('bot_state')
+      .upsert({
+        id: BOT_STATE_ID,
+        is_active: settings.isActive,
+        settings
+      }, { onConflict: 'id' })
+    if (error) throw error
     return settings
   } catch {
     return normalizeSettings(changes)
