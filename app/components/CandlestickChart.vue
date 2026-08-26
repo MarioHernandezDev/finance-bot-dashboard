@@ -40,16 +40,17 @@ onMounted(async () => {
 
   chart = createChart(chartContainer.value, {
     layout: {
-      background: { type: ColorType.Solid, color: '#121824' },
-      textColor: '#94A3B8',
+      background: { type: ColorType.Solid, color: '#FFFFFF' },
+      textColor: '#475569',
     },
     grid: {
-      vertLines: { color: '#1E293B' },
-      horzLines: { color: '#1E293B' },
+      vertLines: { color: '#F1F5F9' },
+      horzLines: { color: '#F1F5F9' },
     },
     width: chartContainer.value.clientWidth,
     height: 400,
     timeScale: {
+      borderColor: '#E2E8F0',
       timeVisible: true,
       secondsVisible: false,
     },
