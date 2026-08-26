@@ -11,10 +11,8 @@ export default defineEventHandler(async (event) => {
       sellRsiThreshold?: number
       riskAllocation?: Record<RiskLevel, number>
     }>(event)
-    console.log('[POST /api/bot/state] Recibido body:', body)
     const changes = Object.fromEntries(Object.entries(body || {}).filter(([, value]) => value !== undefined))
     const updatedSettings = await updateBotSettings(changes)
-    console.log('[POST /api/bot/state] Escritura en Supabase exitosa:', updatedSettings)
     return { ...updatedSettings, paperTrading: (await getBotState()).paperTrading }
   } catch (error: unknown) {
     const detail = error instanceof Error ? error.message : 'Error desconocido al guardar el estado del bot.'

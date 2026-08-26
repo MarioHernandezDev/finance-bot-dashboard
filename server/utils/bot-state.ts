@@ -34,6 +34,11 @@ const normalizeSettings = (stored: Partial<BotSettings> | null | undefined): Bot
   }
 }
 
+const getPersistedSettings = (settings: BotSettings) => {
+  const { logs: _logs, ...persistedSettings } = settings
+  return persistedSettings
+}
+
 export const getBotSettings = async () => {
   try {
     const { data, error } = await supabase
@@ -44,7 +49,7 @@ export const getBotSettings = async () => {
     if (error) throw error
 
     const normalizedSettings = normalizeSettings(data?.settings as Partial<BotSettings> | null | undefined)
-    if (!data || JSON.stringify(data.settings || {}) !== JSON.stringify(normalizedSettings)) {
+    if (!data || JSON.stringify(data.settings || {}) !== JSON.stringify(getPersistedSettings(normalizedSettings))) {
       await ensureBotState(normalizedSettings)
     }
     return normalizedSettings
@@ -60,7 +65,7 @@ const ensureBotState = async (settings = defaultSettings()) => {
     usdt_balance: 10000,
     holdings: {},
     trade_history: [],
-    settings
+    settings: getPersistedSettings(settings)
   })
   if (error) throw error
   return settings
@@ -71,15 +76,13 @@ export const updateBotSettings = async (changes: Partial<BotSettings>) => {
   const payload = {
     id: BOT_STATE_ID,
     is_active: settings.isActive,
-    settings
+    settings: getPersistedSettings(settings)
   }
-  console.log('[bot-state] UPSERT bot_state antes:', payload)
   const { data, error } = await supabase
     .from('bot_state')
     .upsert(payload, { onConflict: 'id' })
     .select('id, is_active, settings')
     .maybeSingle()
-  console.log('[bot-state] UPSERT bot_state después:', { data, error })
   if (error) throw new Error(`No se pudo guardar el estado del bot: ${error.message}`)
   return settings
 }
