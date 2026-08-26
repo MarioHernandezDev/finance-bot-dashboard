@@ -1,17 +1,21 @@
 <template>
-  <header class="min-h-16 border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md px-4 sm:px-6 flex items-center justify-between sticky top-0 z-10">
+  <header class="min-h-[4.5rem] border-b border-slate-200/80 bg-white/80 backdrop-blur-xl px-5 sm:px-10 flex items-center justify-between sticky top-0 z-10 shadow-sm shadow-slate-200/40">
     <div class="flex items-center gap-3 min-w-0">
-      <h1 class="text-sm sm:text-base font-semibold text-white truncate">Panel de Control</h1>
-      <span class="hidden sm:inline-flex bg-slate-900 text-slate-400 text-[10px] px-2.5 py-1 rounded-lg border border-slate-800 font-mono">
+      <div>
+        <p class="text-xs text-emerald-700 uppercase tracking-tight">Overview / Live market</p>
+        <h1 class="text-lg sm:text-xl font-semibold tracking-tight text-slate-900 truncate">Panel de Control</h1>
+      </div>
+      <span class="hidden sm:inline-flex bg-slate-50 text-slate-600 text-xs px-3 py-1.5 rounded-full border border-slate-200">
         BTC / USDT
       </span>
     </div>
 
     <div class="flex items-center gap-3">
       <!-- Indicador de estado de conexión API (Simulado) -->
-      <div class="flex items-center gap-2 bg-slate-900/80 px-2.5 sm:px-3 py-1.5 rounded-lg border border-slate-800 text-[10px] sm:text-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-        <span class="text-emerald-300 font-mono">ONLINE</span>
+      <div class="flex items-center gap-2 bg-emerald-50 px-3 py-2 rounded-full border border-emerald-200 text-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse shadow-sm shadow-emerald-300"></span>
+        <span class="text-emerald-700 font-semibold">SYSTEM OK</span>
+        <span class="hidden sm:inline text-slate-500">/ Mario H.</span>
       </div>
     </div>
   </header>
