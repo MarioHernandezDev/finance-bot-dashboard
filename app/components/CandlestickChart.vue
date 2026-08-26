@@ -160,7 +160,7 @@ watch(() => props.data, (newData) => {
             activeInterval === tf.value
               ? 'bg-sky-500 text-white font-bold shadow-sm'
               : 'text-slate-500 hover:text-slate-800',
-            'px-3 py-1.5 rounded-lg text-xs transition-all'
+            'px-3 py-1.5 rounded-xl text-xs transition-all'
           ]"
         >
           {{ tf.label }}

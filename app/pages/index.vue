@@ -100,7 +100,7 @@ onUnmounted(() => {
         <RsiChart :data="chartData" />
         
         <template #fallback>
-          <div class="h-[400px] bg-white border border-slate-100 rounded-3xl shadow-xl shadow-slate-200/60 animate-pulse flex flex-col items-center justify-center gap-2 text-slate-500 text-sm">
+          <div class="h-[400px] bg-white border border-slate-200/60 rounded-2xl shadow-sm animate-pulse flex flex-col items-center justify-center gap-4 text-slate-500 text-sm">
             <span class="animate-spin text-xl">⏳</span>
             <span>Cargando gráfico de velas e indicadores...</span>
           </div>
