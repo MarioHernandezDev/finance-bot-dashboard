@@ -36,60 +36,60 @@ const showMessage = (msg: string, error: boolean) => {
 </script>
 
 <template>
-  <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl p-4 sm:p-5 shadow-xl shadow-black/10 space-y-4">
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
-      <h3 class="text-sm font-bold text-white flex items-center gap-2">
+  <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm space-y-8">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2">
+      <h3 class="text-xl font-semibold tracking-tight text-slate-900 flex items-center gap-3">
         <span>⚡</span> Operativa Manual (Paper Trading)
       </h3>
-      <span class="self-start text-[10px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-1 rounded-lg border border-emerald-500/20">
+      <span class="self-start text-sm text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
         USDT Virtual: {{ formatCurrency(usdtBalance) }}
       </span>
     </div>
 
     <!-- Feedback Banner -->
-    <div v-if="feedbackMessage" :class="[isError ? 'bg-rose-500/20 text-rose-300 border-rose-500/30' : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30', 'text-xs p-2.5 rounded-xl border font-mono transition-all']">
+    <div v-if="feedbackMessage" :class="[isError ? 'bg-rose-50 text-rose-700 border-rose-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200', 'text-sm p-4 rounded-xl border transition-all']">
       {{ feedbackMessage }}
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 items-stretch">
       <!-- En components/TradePanel.vue -->
-<div class="space-y-1.5">
-  <label class="text-[11px] text-slate-400 font-medium">Monto a Operar (USDT)</label>
+<div class="space-y-3">
+  <label class="text-sm text-slate-600 font-medium">Monto a Operar (USDT)</label>
   <div class="relative flex items-center">
     <input 
       v-model.number="tradeAmount"
       type="number" 
-      class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-3 pr-16 py-3 text-sm text-white font-mono focus:outline-none focus:border-emerald-400"
+      class="[appearance:textfield] w-full bg-white border border-slate-200 rounded-xl pl-3 pr-16 py-3.5 text-sm text-slate-800 font-mono shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all"
       placeholder="500"
     />
-    <span class="absolute right-3 text-xs text-slate-500 font-mono pointer-events-none">USDT</span>
+    <span class="absolute right-3 text-sm text-slate-500 pointer-events-none">USDT</span>
   </div>
 </div>
 
       <!-- Resumen de posición en esta moneda -->
-      <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 flex flex-col justify-center">
-        <span class="text-[10px] text-slate-500 uppercase tracking-wider">Tu posición en {{ cleanSymbol }}</span>
-        <span class="text-sm font-bold text-slate-200 font-mono">
+      <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/60 flex flex-col justify-center gap-2">
+        <span class="text-sm text-slate-600">Tu posición en {{ cleanSymbol }}</span>
+        <span class="text-base font-semibold text-slate-800">
           {{ userHolding.toFixed(4) }} {{ cleanSymbol }}
         </span>
-        <span class="text-[10px] text-slate-400 font-mono">
+        <span class="text-sm text-slate-500">
           ≈ {{ formatCurrency(userHolding * currentPrice) }}
         </span>
       </div>
     </div>
 
     <!-- Botones de Acción -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
       <button 
         @click="handleBuy"
-        class="bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-bold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/40"
+        class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-medium py-3 px-6 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
       >
         <span>🟢</span> COMPRAR {{ cleanSymbol }}
       </button>
 
       <button 
         @click="handleSell"
-        class="bg-rose-500 hover:bg-rose-400 active:scale-[0.98] text-white font-bold py-3 px-4 rounded-xl text-xs transition-all flex items-center justify-center gap-2 shadow-lg shadow-rose-950/40"
+        class="bg-red-600 hover:bg-red-700 active:scale-[0.98] text-white font-medium py-3 px-6 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
       >
         <span>🔴</span> VENDER TODO
       </button>
