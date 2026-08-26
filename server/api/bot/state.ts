@@ -11,9 +11,15 @@ export default defineEventHandler(async (event) => {
       sellRsiThreshold?: number
       riskAllocation?: Record<RiskLevel, number>
     }>(event)
+    console.log('[POST /api/bot/state] Recibido body:', body)
     const changes = Object.fromEntries(Object.entries(body || {}).filter(([, value]) => value !== undefined))
-    return { ...(await updateBotSettings(changes)), paperTrading: (await getBotState()).paperTrading }
-  } catch {
-    return await getBotState()
+    const updatedSettings = await updateBotSettings(changes)
+    console.log('[POST /api/bot/state] Escritura en Supabase exitosa:', updatedSettings)
+    return { ...updatedSettings, paperTrading: (await getBotState()).paperTrading }
+  } catch (error: unknown) {
+    const detail = error instanceof Error ? error.message : 'Error desconocido al guardar el estado del bot.'
+    console.error('[POST /api/bot/state] Error de escritura en Supabase:', detail)
+    setResponseStatus(event, 500)
+    return { success: false, error: detail }
   }
 })

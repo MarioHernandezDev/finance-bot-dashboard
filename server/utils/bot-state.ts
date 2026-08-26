@@ -67,20 +67,21 @@ const ensureBotState = async (settings = defaultSettings()) => {
 }
 
 export const updateBotSettings = async (changes: Partial<BotSettings>) => {
-  try {
-    const settings = normalizeSettings({ ...(await getBotSettings()), ...changes })
-    const { error } = await supabase
-      .from('bot_state')
-      .upsert({
-        id: BOT_STATE_ID,
-        is_active: settings.isActive,
-        settings
-      }, { onConflict: 'id' })
-    if (error) throw error
-    return settings
-  } catch {
-    return normalizeSettings(changes)
+  const settings = normalizeSettings({ ...(await getBotSettings()), ...changes })
+  const payload = {
+    id: BOT_STATE_ID,
+    is_active: settings.isActive,
+    settings
   }
+  console.log('[bot-state] UPSERT bot_state antes:', payload)
+  const { data, error } = await supabase
+    .from('bot_state')
+    .upsert(payload, { onConflict: 'id' })
+    .select('id, is_active, settings')
+    .maybeSingle()
+  console.log('[bot-state] UPSERT bot_state después:', { data, error })
+  if (error) throw new Error(`No se pudo guardar el estado del bot: ${error.message}`)
+  return settings
 }
 
 export const appendBotLog = async (message: string, symbol?: string) => {
