@@ -21,19 +21,19 @@ const getRiskBadgeClass = (risk: RiskLevel) => {
 </script>
 
 <template>
-  <div class="bg-slate-900/80 backdrop-blur-md border border-slate-800 rounded-xl p-4 sm:p-5 shadow-xl shadow-black/10 space-y-4">
+  <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm space-y-8">
     <!-- Header destello -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-6 pb-2">
       <div class="flex items-center gap-3 min-w-0">
-        <div class="bg-emerald-400/10 border border-emerald-400/30 p-2 rounded-xl text-emerald-300 text-xl shrink-0">
+        <div class="bg-slate-100 border border-slate-200 p-3 rounded-xl text-slate-700 text-xl shrink-0">
           🤖
         </div>
         <div>
-          <h3 class="text-sm sm:text-base font-bold text-white tracking-wide flex flex-wrap items-center gap-2">
+          <h3 class="text-xl font-semibold tracking-tight text-slate-900 flex flex-wrap items-center gap-3">
             Bot Algorítmico Automatizado
-            <span class="text-[10px] bg-emerald-400/10 text-emerald-300 border border-emerald-400/20 px-2 py-0.5 rounded-full font-mono uppercase">Multi-Asset</span>
+            <span class="text-xs bg-slate-100 text-slate-600 border border-slate-200 px-3 py-1 rounded-full uppercase">Multi-Asset</span>
           </h3>
-          <p class="text-xs text-slate-400">Escaneo dinámico con asignación por nivel de riesgo</p>
+          <p class="text-sm text-slate-500 mt-2 leading-relaxed">Escaneo dinámico con asignación por nivel de riesgo</p>
         </div>
       </div>
 
@@ -41,67 +41,67 @@ const getRiskBadgeClass = (risk: RiskLevel) => {
         @click="toggleBot"
         :class="[
           isBotActive 
-            ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/60 shadow-lg shadow-emerald-950/80 ring-2 ring-emerald-500/20' 
-            : 'bg-slate-950 text-slate-400 border-slate-700 hover:border-slate-500',
-          'w-full sm:w-auto px-4 py-3 rounded-xl border font-mono text-xs font-bold transition-all active:scale-[0.98] flex items-center justify-center gap-2.5 cursor-pointer'
+            ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
+            : 'bg-slate-50 text-slate-600 border-slate-200 hover:border-slate-300',
+          'w-full sm:w-auto px-6 py-3 rounded-xl border text-sm font-medium transition-all duration-200 active:scale-[0.98] flex items-center justify-center gap-3 cursor-pointer'
         ]"
       >
-        <span :class="[isBotActive ? 'bg-emerald-400 animate-ping' : 'bg-slate-500', 'w-2.5 h-2.5 rounded-full']"></span>
-        <span class="tracking-wider">{{ isBotActive ? 'BOT ACTIVO' : 'BOT INACTIVO' }}</span>
+        <span :class="[isBotActive ? 'bg-emerald-500' : 'bg-slate-400', 'w-2.5 h-2.5 rounded-full']"></span>
+        <span>{{ isBotActive ? 'BOT ACTIVO' : 'BOT INACTIVO' }}</span>
       </button>
     </div>
 
     <!-- Ajustes de Presupuesto según Riesgo -->
-    <div class="space-y-1.5">
-      <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Asignación de Capital por Operación</span>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
-        <div class="flex flex-col items-center gap-1.5">
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border font-mono" :class="getRiskBadgeClass('LOW')">Bajo (BTC/ETH)</span>
+    <div class="space-y-4">
+      <span class="text-sm text-slate-600 block">Asignación de Capital por Operación</span>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
+        <div class="flex flex-col items-center gap-4">
+          <span class="text-sm font-semibold px-3 py-1.5 rounded-full border" :class="getRiskBadgeClass('LOW')">Bajo (BTC/ETH)</span>
           <div class="flex items-center gap-1">
-            <input v-model.number="riskAllocation.LOW" type="number" class="w-16 bg-slate-900 border border-emerald-500/50 rounded-lg py-2 text-center text-xs text-emerald-300 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-emerald-500" />
-            <span class="text-xs font-bold text-slate-400">%</span>
+            <input v-model.number="riskAllocation.LOW" type="number" class="[appearance:textfield] w-20 bg-slate-50 border border-slate-200 rounded-xl py-3 text-center text-base text-slate-800 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all" />
+            <span class="text-sm font-medium text-slate-500">%</span>
           </div>
         </div>
 
-        <div class="flex flex-col items-center gap-1.5">
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border font-mono" :class="getRiskBadgeClass('MEDIUM')">Medio (SOL/LINK)</span>
+        <div class="flex flex-col items-center gap-4">
+          <span class="text-sm font-semibold px-3 py-1.5 rounded-full border" :class="getRiskBadgeClass('MEDIUM')">Medio (SOL/LINK)</span>
           <div class="flex items-center gap-1">
-            <input v-model.number="riskAllocation.MEDIUM" type="number" class="w-16 bg-slate-900 border border-amber-500/50 rounded-lg py-2 text-center text-xs text-amber-300 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-amber-500" />
-            <span class="text-xs font-bold text-slate-400">%</span>
+            <input v-model.number="riskAllocation.MEDIUM" type="number" class="[appearance:textfield] w-20 bg-slate-50 border border-slate-200 rounded-xl py-3 text-center text-base text-slate-800 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all" />
+            <span class="text-sm font-medium text-slate-500">%</span>
           </div>
         </div>
 
-        <div class="flex flex-col items-center gap-1.5">
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border font-mono" :class="getRiskBadgeClass('HIGH')">Alto (FET/PEPE)</span>
+        <div class="flex flex-col items-center gap-4">
+          <span class="text-sm font-semibold px-3 py-1.5 rounded-full border" :class="getRiskBadgeClass('HIGH')">Alto (FET/PEPE)</span>
           <div class="flex items-center gap-1">
-            <input v-model.number="riskAllocation.HIGH" type="number" class="w-16 bg-slate-900 border border-rose-500/50 rounded-lg py-2 text-center text-xs text-rose-300 font-mono font-bold focus:outline-none focus:ring-1 focus:ring-rose-500" />
-            <span class="text-xs font-bold text-slate-400">%</span>
+            <input v-model.number="riskAllocation.HIGH" type="number" class="[appearance:textfield] w-20 bg-slate-50 border border-slate-200 rounded-xl py-3 text-center text-base text-slate-800 font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all" />
+            <span class="text-sm font-medium text-slate-500">%</span>
           </div>
         </div>
       </div>
     </div>
 
     <!-- Umbrales RSI -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-950/80 p-3 rounded-xl border border-slate-800">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 bg-slate-50 p-6 rounded-2xl border border-slate-200/60">
       <div>
-        <label class="text-[10px] text-emerald-400 font-mono font-semibold block">Comprar si RSI <=</label>
-        <input v-model.number="buyRsiThreshold" type="number" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-3 text-xs text-white font-mono mt-1 focus:outline-none focus:border-emerald-500" />
+        <label class="text-sm text-emerald-700 font-semibold block">Comprar si RSI <=</label>
+        <input v-model.number="buyRsiThreshold" type="number" class="[appearance:textfield] w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-base text-slate-800 mt-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all" />
       </div>
       <div>
-        <label class="text-[10px] text-rose-400 font-mono font-semibold block">Vender si RSI >=</label>
-        <input v-model.number="sellRsiThreshold" type="number" class="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-3 text-xs text-white font-mono mt-1 focus:outline-none focus:border-rose-500" />
+        <label class="text-sm text-rose-700 font-semibold block">Vender si RSI >=</label>
+        <input v-model.number="sellRsiThreshold" type="number" class="[appearance:textfield] w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3.5 text-base text-slate-800 mt-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-400 transition-all" />
       </div>
     </div>
 
     <!-- Terminal de Logs -->
-    <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 h-44 overflow-y-auto overscroll-contain font-mono text-xs space-y-1.5 shadow-inner shadow-black/40">
+    <div class="bg-slate-100/80 border border-slate-200 rounded-2xl p-6 h-52 overflow-y-auto overscroll-contain font-mono text-sm space-y-2">
       <div v-if="botLogs.length > 0">
-        <div v-for="(log, idx) in botLogs" :key="idx" class="text-slate-400 flex items-start gap-1.5 leading-relaxed">
-          <span class="text-emerald-400 font-bold">></span>
+        <div v-for="(log, idx) in botLogs" :key="idx" class="text-slate-700 flex items-start gap-3 leading-relaxed">
+          <span class="text-emerald-600 font-bold">›</span>
           <span>{{ log }}</span>
         </div>
       </div>
-      <div v-else class="text-slate-600 italic py-2 text-center">
+      <div v-else class="text-slate-500 italic py-3 text-center leading-relaxed">
         Haz clic en "BOT INACTIVO" para iniciar el monitoreo algorítmico...
       </div>
     </div>

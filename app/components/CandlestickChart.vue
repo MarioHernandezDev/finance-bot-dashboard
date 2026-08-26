@@ -40,16 +40,17 @@ onMounted(async () => {
 
   chart = createChart(chartContainer.value, {
     layout: {
-      background: { type: ColorType.Solid, color: '#121824' },
-      textColor: '#94A3B8',
+      background: { type: ColorType.Solid, color: '#FFFFFF' },
+      textColor: '#475569',
     },
     grid: {
-      vertLines: { color: '#1E293B' },
-      horzLines: { color: '#1E293B' },
+      vertLines: { color: '#F1F5F9' },
+      horzLines: { color: '#F1F5F9' },
     },
     width: chartContainer.value.clientWidth,
     height: 400,
     timeScale: {
+      borderColor: '#E2E8F0',
       timeVisible: true,
       secondsVisible: false,
     },
@@ -129,11 +130,11 @@ watch(() => props.data, (newData) => {
 </script>
 
 <template>
-  <div class="bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-3">
+  <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm space-y-6">
     <!-- Cabecera e Indicadores -->
     <div class="flex items-center justify-between flex-wrap gap-2">
       <div class="flex items-center gap-3">
-        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+        <h3 class="text-base font-semibold text-slate-900 tracking-tight flex items-center gap-2">
           <span>📈</span> {{ activeSymbol || 'BTCUSDT' }} - Histórico Real
         </h3>
 
@@ -141,8 +142,8 @@ watch(() => props.data, (newData) => {
         <button
           @click="toggleSMA"
           :class="[
-            showSMA ? 'bg-blue-500/20 text-blue-400 border-blue-500/50' : 'bg-dark-bg text-slate-500 border-dark-border',
-            'px-2 py-0.5 rounded text-[11px] font-mono border transition-all flex items-center gap-1.5'
+            showSMA ? 'bg-blue-50 text-blue-600 border-blue-200' : 'bg-slate-50 text-slate-500 border-slate-200',
+            'px-3 py-1.5 rounded-xl text-xs border transition-all flex items-center gap-1.5'
           ]"
         >
           <span class="w-2 h-2 rounded-full bg-blue-500"></span>
@@ -150,16 +151,16 @@ watch(() => props.data, (newData) => {
         </button>
       </div>
 
-      <div class="flex items-center gap-1 bg-dark-bg p-1 rounded-lg border border-dark-border">
+      <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
         <button
           v-for="tf in timeframes"
           :key="tf.value"
           @click="emit('changeInterval', tf.value)"
           :class="[
             activeInterval === tf.value
-              ? 'bg-brand-primary text-white font-bold'
-              : 'text-slate-400 hover:text-slate-200',
-            'px-2.5 py-1 rounded text-xs transition-all font-mono'
+              ? 'bg-sky-500 text-white font-bold shadow-sm'
+              : 'text-slate-500 hover:text-slate-800',
+            'px-3 py-1.5 rounded-xl text-xs transition-all'
           ]"
         >
           {{ tf.label }}
@@ -168,22 +169,22 @@ watch(() => props.data, (newData) => {
     </div>
 
     <!-- Módulo Didáctico / Tooltip Inspector OHLC -->
-    <div v-if="hoveredCandle" class="bg-dark-bg border border-dark-border rounded-lg p-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+    <div v-if="hoveredCandle" class="bg-slate-50 border border-slate-200/60 rounded-2xl p-5 grid grid-cols-2 sm:grid-cols-4 gap-6 text-sm">
       <div>
-        <span class="text-slate-500 block text-[10px] uppercase">Apertura (Open)</span>
-        <span class="text-slate-200 font-semibold">{{ formatCurrency(hoveredCandle.open) }}</span>
+        <span class="text-slate-600 block text-xs uppercase">Apertura (Open)</span>
+        <span class="text-slate-800 font-semibold font-mono">{{ formatCurrency(hoveredCandle.open) }}</span>
       </div>
       <div>
-        <span class="text-slate-500 block text-[10px] uppercase">Máximo (High)</span>
-        <span class="text-brand-bull font-semibold">{{ formatCurrency(hoveredCandle.high) }}</span>
+        <span class="text-slate-600 block text-xs uppercase">Máximo (High)</span>
+        <span class="text-emerald-700 font-semibold font-mono">{{ formatCurrency(hoveredCandle.high) }}</span>
       </div>
       <div>
-        <span class="text-slate-500 block text-[10px] uppercase">Mínimo (Low)</span>
-        <span class="text-brand-bear font-semibold">{{ formatCurrency(hoveredCandle.low) }}</span>
+        <span class="text-slate-600 block text-xs uppercase">Mínimo (Low)</span>
+        <span class="text-rose-700 font-semibold font-mono">{{ formatCurrency(hoveredCandle.low) }}</span>
       </div>
       <div>
-        <span class="text-slate-500 block text-[10px] uppercase">Cierre (Close)</span>
-        <span :class="hoveredCandle.close >= hoveredCandle.open ? 'text-brand-bull' : 'text-brand-bear'" class="font-semibold">
+        <span class="text-slate-600 block text-xs uppercase">Cierre (Close)</span>
+        <span :class="hoveredCandle.close >= hoveredCandle.open ? 'text-emerald-700' : 'text-rose-700'" class="font-semibold font-mono">
           {{ formatCurrency(hoveredCandle.close) }}
         </span>
       </div>

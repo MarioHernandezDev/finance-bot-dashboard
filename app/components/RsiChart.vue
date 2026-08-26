@@ -20,16 +20,17 @@ onMounted(async () => {
 
   chart = createChart(chartContainer.value, {
     layout: {
-      background: { type: ColorType.Solid, color: '#121824' },
-      textColor: '#94A3B8',
+      background: { type: ColorType.Solid, color: '#FFFFFF' },
+      textColor: '#475569',
     },
     grid: {
-      vertLines: { color: '#1E293B' },
-      horzLines: { color: '#1E293B' },
+      vertLines: { color: '#F1F5F9' },
+      horzLines: { color: '#F1F5F9' },
     },
     width: chartContainer.value.clientWidth,
     height: 150,
     timeScale: {
+      borderColor: '#E2E8F0',
       visible: true,
       timeVisible: true,
     },
@@ -37,7 +38,7 @@ onMounted(async () => {
 
   // Serie para la línea de RSI (Morada)
   rsiSeries = chart.addSeries(LineSeries, {
-    color: '#A855F7',
+    color: '#8B5CF6',
     lineWidth: 2,
     title: 'RSI 14',
   })
@@ -80,26 +81,26 @@ watch(() => props.data, (newData) => {
 </script>
 
 <template>
-  <div class="bg-dark-surface border border-dark-border rounded-xl p-4 shadow-xl space-y-2">
+  <div class="bg-white border border-slate-200/60 rounded-2xl p-6 shadow-sm space-y-5">
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-2">
-        <h4 class="text-xs font-bold text-white uppercase tracking-wider">Oscilador RSI (14)</h4>
+        <h4 class="text-base font-semibold text-slate-900 uppercase tracking-tight">Oscilador RSI (14)</h4>
         <span 
           v-if="currentRSI !== null"
           :class="[
-            currentRSI >= 70 ? 'bg-red-500/20 text-red-400 border-red-500/30' :
-            currentRSI <= 30 ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' :
-            'bg-purple-500/20 text-purple-400 border-purple-500/30',
-            'text-[10px] font-mono px-2 py-0.5 rounded border font-semibold'
+            currentRSI >= 70 ? 'bg-rose-50 text-rose-600 border-rose-200' :
+            currentRSI <= 30 ? 'bg-emerald-50 text-emerald-600 border-emerald-200' :
+            'bg-slate-100 text-slate-600 border-slate-200',
+            'text-xs px-3 py-1.5 rounded-xl border font-semibold'
           ]"
         >
           {{ currentRSI }} - {{ currentRSI >= 70 ? 'Sobrecompra' : currentRSI <= 30 ? 'Sobreventa' : 'Neutral' }}
         </span>
       </div>
 
-      <div class="flex items-center gap-3 text-[10px] text-slate-400 font-mono">
-        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-red-400"></span> 70 Sobrecompra</span>
-        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> 30 Sobreventa</span>
+      <div class="flex items-center gap-4 text-xs text-slate-600">
+        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> 70 Sobrecompra</span>
+        <span class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> 30 Sobreventa</span>
       </div>
     </div>
 

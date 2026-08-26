@@ -51,16 +51,16 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="space-y-6">
-    <div class="flex items-center justify-between">
+  <div class="max-w-[1680px] mx-auto space-y-7">
+    <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
       <div>
-        <h2 class="text-lg font-bold text-white">Mercado Principal</h2>
-        <p class="text-xs text-slate-400">Precios en tiempo real de los 6 activos monitoreados</p>
+        <h2 class="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">Mercado Principal</h2>
+        <p class="text-sm text-slate-600 mt-2 leading-relaxed">Seis activos monitorizados con datos actualizados automáticamente</p>
       </div>
 
       <button 
         @click="loadMarketData"
-        class="bg-dark-surface hover:bg-dark-border text-slate-300 text-xs px-3 py-2 rounded-lg border border-dark-border flex items-center gap-2 transition-all cursor-pointer"
+        class="bg-white hover:bg-slate-50 text-slate-700 text-sm px-5 py-3 rounded-xl border border-slate-200/60 shadow-sm hover:shadow-md transition-all duration-200 cursor-pointer"
       >
         <span>🔄</span>
         <span>Refrescar</span>
@@ -74,8 +74,8 @@ onUnmounted(() => {
         :key="asset.symbol"
         @click="handleSelectAsset(asset.symbol)"
         :class="[
-          selectedSymbol.startsWith(asset.symbol) ? 'ring-2 ring-indigo-500 scale-[1.02]' : 'hover:border-slate-600',
-          'cursor-pointer transition-all rounded-xl'
+          selectedSymbol.startsWith(asset.symbol) ? 'ring-2 ring-emerald-300/60' : '',
+          'cursor-pointer transition-all rounded-2xl'
         ]"
       >
         <CryptoCard :asset="asset" />
@@ -84,11 +84,11 @@ onUnmounted(() => {
 
     <!-- Skeleton Loading -->
     <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-      <div v-for="i in 6" :key="i" class="h-28 bg-dark-surface/50 border border-dark-border rounded-xl animate-pulse"></div>
+      <div v-for="i in 6" :key="i" class="h-36 bg-white border border-slate-200/60 rounded-2xl shadow-sm animate-pulse"></div>
     </div>
 
     <!-- Gráficos -->
-    <div class="pt-2 space-y-4">
+    <div class="pt-3 space-y-4">
       <ClientOnly>
         <CandlestickChart 
           :data="chartData" 
@@ -100,7 +100,7 @@ onUnmounted(() => {
         <RsiChart :data="chartData" />
         
         <template #fallback>
-          <div class="h-[400px] bg-dark-surface border border-dark-border rounded-xl animate-pulse flex flex-col items-center justify-center gap-2 text-slate-400 text-sm">
+          <div class="h-[400px] bg-white border border-slate-200/60 rounded-2xl shadow-sm animate-pulse flex flex-col items-center justify-center gap-4 text-slate-500 text-sm">
             <span class="animate-spin text-xl">⏳</span>
             <span>Cargando gráfico de velas e indicadores...</span>
           </div>
