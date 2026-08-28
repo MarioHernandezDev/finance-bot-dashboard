@@ -19,8 +19,12 @@ const defaultSettings = (): BotSettings => ({
 })
 
 const defaultPaperTradingState = (): PaperTradingState => ({
-  usdtBalance: 10000,
+  usdtBalance: 100,
+  initialBalance: 100,
   holdings: {},
+  averageBuyPrices: {},
+  stopLossPrices: {},
+  takeProfitPrices: {},
   tradeHistory: []
 })
 

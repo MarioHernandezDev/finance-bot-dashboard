@@ -96,6 +96,27 @@ export const evaluateMarket = async (symbol: string) => {
     await appendBotLog(`🔍 ${assetName}: RSI ${rsi.toFixed(1)} | $${latestPrice} | SMA20 $${sma20.toFixed(2)}`, symbol)
     await sendExtremeMarketAlert(symbol, rsi, latestPrice, drop15m)
 
+    const stopLossPrice = paperTrading.stopLossPrices[assetName] || 0
+    const takeProfitPrice = paperTrading.takeProfitPrices[assetName] || 0
+    if (currentHolding > 0 && stopLossPrice > 0 && latestPrice <= stopLossPrice) {
+      const result = await sellAsset(symbol, latestPrice)
+      if (result.success) {
+        const message = `🔴 STOP-LOSS EJECUTADO: Venta de ${assetName} por pérdida del 2%`
+        await appendBotLog(message, symbol)
+        await sendTelegramAlert(message)
+      }
+      return
+    }
+    if (currentHolding > 0 && takeProfitPrice > 0 && latestPrice >= takeProfitPrice) {
+      const result = await sellAsset(symbol, latestPrice)
+      if (result.success) {
+        const message = `🟢 TAKE-PROFIT EJECUTADO: Venta de ${assetName} con beneficio del 4%`
+        await appendBotLog(message, symbol)
+        await sendTelegramAlert(message)
+      }
+      return
+    }
+
     if (rsi <= settings.buyRsiThreshold && latestPrice > sma20 && currentHolding <= 0) {
       const assetInfo = SUPPORTED_ASSETS.find(asset => asset.symbol === symbol)
       const risk: RiskLevel = assetInfo?.risk || 'MEDIUM'

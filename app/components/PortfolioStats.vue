@@ -4,11 +4,11 @@ const props = defineProps<{
   prices: Record<string, number>
 }>()
 
-const { INITIAL_BALANCE, usdtBalance, getPortfolioValue } = usePaperTrading()
+const { usdtBalance, initialBalance, getPortfolioValue } = usePaperTrading()
 
 const totalPortfolioValue = computed(() => getPortfolioValue(props.prices))
-const pnl = computed(() => totalPortfolioValue.value - INITIAL_BALANCE)
-const pnlPercentage = computed(() => (pnl.value / INITIAL_BALANCE) * 100)
+const pnl = computed(() => usdtBalance.value - initialBalance.value)
+const pnlPercentage = computed(() => initialBalance.value > 0 ? (pnl.value / initialBalance.value) * 100 : 0)
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)

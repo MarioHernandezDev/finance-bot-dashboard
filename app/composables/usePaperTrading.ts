@@ -15,16 +15,18 @@ export interface TradeResult {
 }
 
 export const usePaperTrading = () => {
-  const INITIAL_BALANCE = 10000
+  const INITIAL_BALANCE = 100
   const usdtBalance = useState<number>('paper_usdt_balance', () => INITIAL_BALANCE)
+  const initialBalance = useState<number>('paper_initial_balance', () => INITIAL_BALANCE)
   
   const holdings = useState<Record<string, number>>('paper_holdings', () => ({}))
 
   const tradeHistory = useState<TradePosition[]>('paper_history', () => [])
 
   const refresh = async () => {
-    const state = await $fetch<{ paperTrading: { usdtBalance: number; holdings: Record<string, number>; tradeHistory: TradePosition[] } }>('/api/bot/state')
+    const state = await $fetch<{ paperTrading: { usdtBalance: number; initialBalance: number; holdings: Record<string, number>; tradeHistory: TradePosition[] } }>('/api/bot/state')
     usdtBalance.value = state.paperTrading.usdtBalance
+    initialBalance.value = state.paperTrading.initialBalance
     holdings.value = state.paperTrading.holdings
     tradeHistory.value = state.paperTrading.tradeHistory
   }
@@ -61,6 +63,7 @@ export const usePaperTrading = () => {
   return {
     INITIAL_BALANCE,
     usdtBalance,
+    initialBalance,
     holdings,
     tradeHistory,
     refresh,

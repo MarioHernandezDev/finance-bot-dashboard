@@ -7,18 +7,23 @@ const props = defineProps<{
 
 const { usdtBalance, holdings, buyAsset, sellAsset } = usePaperTrading()
 
-const tradeAmount = ref<number>(500)
+const tradeAmount = ref<number>(10)
 const feedbackMessage = ref<string | null>(null)
 const isError = ref(false)
 
 const cleanSymbol = computed(() => props.symbol.replace('USDT', ''))
 const userHolding = computed(() => holdings.value[cleanSymbol.value] || 0)
+const canBuy = computed(() => Number.isFinite(tradeAmount.value) && tradeAmount.value > 0 && tradeAmount.value <= usdtBalance.value)
 
 const formatCurrency = (val: number) => {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(val)
 }
 
 const handleBuy = async () => {
+  if (!canBuy.value) {
+    showMessage('El monto debe ser mayor que 0 y no superar el saldo disponible.', true)
+    return
+  }
   const result = await buyAsset(props.symbol, props.currentPrice, tradeAmount.value)
   showMessage(result.message, !result.success)
 }
@@ -59,8 +64,10 @@ const showMessage = (msg: string, error: boolean) => {
     <input 
       v-model.number="tradeAmount"
       type="number" 
+      min="0.01"
+      :max="usdtBalance"
       class="[appearance:textfield] w-full bg-white border border-slate-200 rounded-xl pl-3 pr-16 py-3.5 text-sm text-slate-800 font-mono shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-200 focus:border-emerald-400 transition-all"
-      placeholder="500"
+      placeholder="10"
     />
     <span class="absolute right-3 text-sm text-slate-500 pointer-events-none">USDT</span>
   </div>
@@ -82,7 +89,8 @@ const showMessage = (msg: string, error: boolean) => {
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
       <button 
         @click="handleBuy"
-        class="bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white font-medium py-3 px-6 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
+        :disabled="!canBuy"
+        class="bg-emerald-600 hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.98] text-white font-medium py-3 px-6 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
       >
         <span>🟢</span> COMPRAR {{ cleanSymbol }}
       </button>

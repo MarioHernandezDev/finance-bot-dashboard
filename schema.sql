@@ -1,11 +1,27 @@
 create table if not exists public.bot_state (
   id integer primary key check (id = 1),
   is_active boolean not null default false,
-  usdt_balance numeric not null default 10000,
+  usdt_balance numeric not null default 100,
   holdings jsonb not null default '{}'::jsonb,
   trade_history jsonb not null default '[]'::jsonb,
   settings jsonb not null default '{}'::jsonb,
   last_scan_timestamp timestamptz,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.paper_portfolio (
+  id uuid primary key default gen_random_uuid(),
+  initial_balance numeric not null default 100,
+  current_balance numeric not null default 100,
+  updated_at timestamptz not null default now()
+);
+
+create table if not exists public.paper_positions (
+  symbol text primary key,
+  amount numeric not null default 0,
+  average_buy_price numeric not null default 0,
+  stop_loss_price numeric not null default 0,
+  take_profit_price numeric not null default 0,
   updated_at timestamptz not null default now()
 );
 
