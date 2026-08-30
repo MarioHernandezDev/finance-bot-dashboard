@@ -3,7 +3,15 @@ import { appendBotLog, getBotSettings, updateLastScanTimestamp } from './bot-sta
 import { buyAsset, getPaperTradingState, sellAsset } from './paper-trading'
 import { sendTelegramAlert } from './telegram'
 
-const BINANCE_KLINES_URL = 'https://api3.binance.com/api/v3/klines'
+const COINGECKO_MARKET_CHART_URL = 'https://api.coingecko.com/api/v3/coins'
+const COINGECKO_IDS: Record<string, string> = {
+  BTCUSDT: 'bitcoin',
+  ETHUSDT: 'ethereum',
+  SOLUSDT: 'solana',
+  LINKUSDT: 'chainlink',
+  FETUSDT: 'fetch-ai',
+  PEPEUSDT: 'pepe'
+}
 const BETWEEN_ASSETS_DELAY_MS = 300
 const ALERT_COOLDOWN_MS = 15 * 60 * 1000
 const ALERT_SYMBOLS = new Set(['SOLUSDT', 'LINKUSDT', 'FETUSDT', 'PEPEUSDT'])
@@ -60,13 +68,17 @@ const sendExtremeMarketAlert = async (symbol: string, rsi: number, latestPrice: 
 
 export const evaluateMarket = async (symbol: string) => {
   try {
-    const res = await $fetch<unknown[][]>(BINANCE_KLINES_URL, {
-      query: { symbol, interval: '1m', limit: 30 },
+    const marketData = await $fetch<{ prices?: number[][] }>(
+      `${COINGECKO_MARKET_CHART_URL}/${COINGECKO_IDS[symbol]}/market_chart`,
+      {
+      query: { vs_currency: 'usd', days: 1 },
       timeout: 5000
-    })
+      }
+    )
+    const res = marketData.prices?.slice(-30) || []
     if (!res || res.length < 20) return
 
-    const closePrices = res.map(kline => Number(kline[4])).filter(Number.isFinite)
+    const closePrices = res.map(kline => Number(kline[1])).filter(Number.isFinite)
     if (closePrices.length < 15) return
     const latestPrice = closePrices.at(-1)
     if (latestPrice === undefined) return
